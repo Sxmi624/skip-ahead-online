@@ -1,16 +1,25 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import GameSetup from '@/components/GameSetup';
+import GameBoard from '@/components/GameBoard';
+import { initGame } from '@/game/engine';
+import { GameState } from '@/game/types';
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
-  return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
-  );
+const Index = () => {
+  const [gameState, setGameState] = useState<GameState | null>(null);
+
+  const handleStart = (stockpileSize: number) => {
+    setGameState(initGame(stockpileSize));
+  };
+
+  const handleRestart = () => {
+    setGameState(null);
+  };
+
+  if (!gameState) {
+    return <GameSetup onStart={handleStart} />;
+  }
+
+  return <GameBoard initialState={gameState} onRestart={handleRestart} />;
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
