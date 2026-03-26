@@ -1,0 +1,29 @@
+services:
+  # ── Backend: Socket.io Server ──────────────────────────────────────────
+  - type: web
+    name: stackbo-server
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: false
+        value: 10000
+
+  # ── Frontend: Vite React App ───────────────────────────────────────────
+  - type: web
+    name: stackbo-frontend
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_SERVER_URL
+        # Set this to your Render backend URL after deploying the server
+        # e.g. https://stackbo-server.onrender.com
+        value: https://stackbo-server.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
