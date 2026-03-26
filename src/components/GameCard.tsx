@@ -62,6 +62,11 @@ export default function GameCard({ card, faceDown, onClick, selected, size = 'md
       }`}
       onClick={onClick}
     >
+      {/* Top-left corner value for visibility when stacked */}
+      <span className={`absolute top-0.5 left-1 text-[10px] font-display ${card ? getCardColor(card.value) : ''}`}>
+        {card?.value === 'JOKER' ? (card.displayValue ?? '★') : card?.value}
+      </span>
+      {/* Center value */}
       <span className={`font-display text-2xl ${card ? getCardColor(card.value) : ''}`}>
         {card?.value === 'JOKER' ? (card.displayValue ?? '★') : card?.value}
       </span>
