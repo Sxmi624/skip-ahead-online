@@ -10,9 +10,9 @@ interface DiscardPileProps {
 }
 
 const offsetMap = {
-  sm: 14,
-  md: 18,
-  lg: 22,
+  sm: 20,
+  md: 26,
+  lg: 32,
 };
 
 export default function DiscardPile({ pile, size = 'lg', onClick, selected, maxVisible = 6 }: DiscardPileProps) {
