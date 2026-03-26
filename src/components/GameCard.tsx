@@ -63,10 +63,12 @@ export default function GameCard({ card, faceDown, onClick, selected, size = 'md
       onClick={onClick}
     >
       <span className={`font-display text-2xl ${card ? getCardColor(card.value) : ''}`}>
-        {card?.value === 'JOKER' ? '★' : card?.value}
+        {card?.value === 'JOKER' ? (card.displayValue ?? '★') : card?.value}
       </span>
       {card?.value === 'JOKER' && (
-        <span className="absolute bottom-1 text-[8px] text-joker font-display">JOKER</span>
+        <span className="absolute bottom-1 text-[8px] text-joker font-display">
+          {card.displayValue ? `★${card.displayValue}` : 'JOKER'}
+        </span>
       )}
     </motion.div>
   );

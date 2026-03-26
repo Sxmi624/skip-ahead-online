@@ -141,6 +141,11 @@ export function playCard(state: GameState, playerIndex: number, source: CardSour
   }
 
   if (target.type === 'build') {
+    const needed = getBuildPileNext(newState.buildPiles[target.pileIndex]);
+    // Set display value on joker
+    if (card.value === 'JOKER') {
+      card.displayValue = needed;
+    }
     newState.buildPiles[target.pileIndex].push(card);
     // Check if pile is complete (12)
     if (newState.buildPiles[target.pileIndex].length === 12) {
