@@ -24,79 +24,60 @@ function getCardColor(value: CardType['value']): string {
   return 'text-secondary font-bold';
 }
 
-type SpecialCardDef = {
-  emoji: string;
-  label: string;
-  bg: string;
-  border: string;
-  selectedBorder: string;
-};
-
-const SPECIAL_CARDS: Partial<Record<string, SpecialCardDef>> = {
-  BLOCKER: { emoji: '🚫', label: 'BLOCK',  bg: 'bg-red-700',    border: 'border-red-500',    selectedBorder: 'border-gold ring-2 ring-gold/50' },
-  STEAL:   { emoji: '🃏', label: 'STEAL',  bg: 'bg-amber-600',  border: 'border-amber-400',  selectedBorder: 'border-gold ring-2 ring-gold/50' },
-  SKIP:    { emoji: '⏭️', label: 'SKIP',   bg: 'bg-blue-700',   border: 'border-blue-400',   selectedBorder: 'border-gold ring-2 ring-gold/50' },
-  BOMB:    { emoji: '💣', label: 'BOMB',   bg: 'bg-orange-700', border: 'border-orange-400', selectedBorder: 'border-gold ring-2 ring-gold/50' },
-  SWAP:    { emoji: '🔄', label: 'SWAP',   bg: 'bg-purple-700', border: 'border-purple-400', selectedBorder: 'border-gold ring-2 ring-gold/50' },
-};
-
-// Gemeinsame Animationen für das Reinfliegen und Layout-Wechsel
-const cardVariants = {
-  initial: { opacity: 0, y: 40, scale: 0.8 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, scale: 0.5, transition: { duration: 0.2 } }
-};
-
-const springTransition = {
-  type: "spring",
-  stiffness: 300,
-  damping: 25
+const SPECIAL_CARDS: Record<string, any> = {
+  BLOCKER: { emoji: '🚫', label: 'BLOCK',  bg: 'bg-red-700',    border: 'border-red-500' },
+  STEAL:   { emoji: '🃏', label: 'STEAL',  bg: 'bg-amber-600',  border: 'border-amber-400' },
+  SKIP:    { emoji: '⏭️', label: 'SKIP',   bg: 'bg-blue-700',   border: 'border-blue-400' },
+  BOMB:    { emoji: '💣', label: 'BOMB',   bg: 'bg-orange-700', border: 'border-orange-400' },
+  SWAP:    { emoji: '🔄', label: 'SWAP',   bg: 'bg-purple-700', border: 'border-purple-400' },
 };
 
 export default function GameCard({ card, faceDown, onClick, selected, size = 'md', count }: GameCardProps) {
   const sizeClass = sizeClasses[size];
 
-  // Drag-Einstellungen für das "Ziehen" mit dem Finger
-  const dragProps = {
-    drag: true,
-    dragConstraints: { left: 0, right: 0, top: 0, bottom: 0 },
-    dragElastic: 0.5,
-    whileDrag: { scale: 1.1, zIndex: 100, rotate: 2 },
+  // Die Animation, wenn die Karte erscheint
+  const appearance = {
+    initial: { opacity: 0, y: 100, scale: 0.3, rotate: -10 },
+    animate: { opacity: 1, y: 0, scale: 1, rotate: 0 },
+    transition: { 
+      type: "spring", 
+      stiffness: 150, 
+      damping: 15,
+      mass: 0.8
+    }
   };
 
-  // ── Empty slot ────────────────────────────────────────────────────────
+  // Drag-Einstellungen
+  const dragConfig = {
+    drag: true,
+    dragSnapToOrigin: true, // Karte springt zurück, wenn nicht auf Feld gedroppt
+    whileDrag: { scale: 1.1, zIndex: 100, rotate: 5, cursor: 'grabbing' },
+    dragTransition: { bounceStiffness: 600, bounceDamping: 20 },
+    dragElastic: 0.4
+  };
+
+  const commonClasses = `${sizeClass} rounded-lg shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing relative border-2 transition-colors shrink-0`;
+
   if (!card && !faceDown) {
     return (
       <motion.div
         layout
-        initial="initial"
-        animate="animate"
-        variants={cardVariants}
-        transition={springTransition}
-        className={`${sizeClass} rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center cursor-pointer hover:border-gold/60 transition-colors shrink-0`}
-        onClick={onClick}
+        className={`${sizeClass} rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center`}
       >
         <span className="text-muted-foreground/40 text-[10px]">–</span>
       </motion.div>
     );
   }
 
-  // ── Face-down (Verdeckte Karte) ───────────────────────────────────────
   if (faceDown) {
     return (
       <motion.div 
-        layout
-        initial="initial"
-        animate="animate"
-        variants={cardVariants}
-        transition={springTransition}
-        className={`${sizeClass} rounded-lg bg-card-back shadow-lg flex items-center justify-center relative border-2 border-card-back shrink-0`}
+        layout {...appearance}
+        className={`${commonClasses} bg-card-back border-card-back`}
       >
-        <div className="absolute inset-1 rounded border border-foreground/10 flex items-center justify-center pointer-events-none">
-          <span className="font-display text-primary-foreground/70 text-[10px] sm:text-xs uppercase">S·B</span>
-        </div>
+        <span className="font-display text-primary-foreground/70 text-[10px] sm:text-xs">S·B</span>
         {count !== undefined && count > 0 && (
-          <div className="absolute -top-2 -right-2 bg-gold text-secondary-foreground rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-[10px] sm:text-xs font-bold shadow">
+          <div className="absolute -top-2 -right-2 bg-gold text-secondary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow">
             {count}
           </div>
         )}
@@ -104,57 +85,36 @@ export default function GameCard({ card, faceDown, onClick, selected, size = 'md
     );
   }
 
-  // ── Special cards (BLOCKER / STEAL / SKIP / BOMB / SWAP) ──────────────
   const special = card ? SPECIAL_CARDS[card.value as string] : undefined;
-  if (special) {
-    return (
-      <motion.div
-        layout
-        initial="initial"
-        animate="animate"
-        variants={cardVariants}
-        transition={springTransition}
-        {...dragProps}
-        whileHover={{ y: -10, scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className={`${sizeClass} rounded-lg ${special.bg} shadow-lg flex flex-col items-center justify-center cursor-pointer relative border-2 transition-colors shrink-0 ${
-          selected ? special.selectedBorder : `${special.border} hover:border-gold/40`
-        }`}
-        onClick={onClick}
-      >
-        <span className="text-xl sm:text-2xl leading-none pointer-events-none">{special.emoji}</span>
-        <span className="text-white/80 text-[7px] sm:text-[9px] font-display mt-1 tracking-wide uppercase pointer-events-none">{special.label}</span>
-      </motion.div>
-    );
-  }
 
-  // ── Regular / Joker card ───────────────────────────────────────────────
   return (
     <motion.div
       layout
-      initial="initial"
-      animate="animate"
-      variants={cardVariants}
-      transition={springTransition}
-      {...dragProps}
+      {...appearance}
+      {...(onClick ? {} : dragConfig)} // Drag nur an, wenn kein einfacher Klick-Modus
+      drag={true}
+      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+      dragElastic={0.5}
+      dragSnapToOrigin={true}
       whileHover={{ y: -10, scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className={`${sizeClass} rounded-lg bg-card shadow-lg flex items-center justify-center cursor-pointer relative border-2 transition-colors shrink-0 ${
-        selected ? 'border-gold ring-2 ring-gold/50' : 'border-card/80 hover:border-gold/40'
+      onDragEnd={(_, info) => {
+        // Hier prüfen wir später, ob die Karte über einem Feld losgelassen wurde
+        if (Math.abs(info.offset.y) > 100 && onClick) {
+          onClick(); // Simuliert das Ausspielen beim Hochwischen
+        }
+      }}
+      className={`${commonClasses} ${special ? special.bg : 'bg-card'} ${
+        selected ? 'border-gold ring-2 ring-gold/50' : special ? special.border : 'border-card/80'
       }`}
       onClick={onClick}
     >
-      <span className={`absolute top-0.5 left-1 text-[8px] sm:text-[10px] font-display pointer-events-none ${card ? getCardColor(card.value) : ''}`}>
-        {card?.value === 'JOKER' ? (card.displayValue ?? '★') : card?.value}
-      </span>
-      <span className={`font-display text-xl sm:text-2xl pointer-events-none ${card ? getCardColor(card.value) : ''}`}>
-        {card?.value === 'JOKER' ? (card.displayValue ?? '★') : card?.value}
-      </span>
-      {card?.value === 'JOKER' && (
-        <span className="absolute bottom-1 text-[7px] sm:text-[8px] text-joker font-display pointer-events-none">
-          {card.displayValue ? `★${card.displayValue}` : 'JOKER'}
+      <div className="flex flex-col items-center pointer-events-none">
+        <span className={`font-display ${special ? 'text-2xl' : `text-xl ${getCardColor(card.value)}`}`}>
+          {special ? special.emoji : (card?.value === 'JOKER' ? '★' : card?.value)}
         </span>
-      )}
+        {special && <span className="text-white/80 text-[7px] font-display uppercase">{special.label}</span>}
+      </div>
     </motion.div>
   );
 }
