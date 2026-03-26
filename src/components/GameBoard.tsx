@@ -5,7 +5,6 @@ import { canPlayCard, playCard, executeAITurn, getTopCard, getBuildPileNext } fr
 import GameCard from './GameCard';
 import DiscardPile from './DiscardPile';
 import { Button } from '@/components/ui/button';
-import { Button } from '@/components/ui/button';
 
 interface GameBoardProps {
   initialState: GameState;
