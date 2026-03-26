@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameState, CardSource, CardTarget } from '@/game/types';
 import { canPlayCard, playCard, executeAITurn, getTopCard, getBuildPileNext } from '@/game/engine';
 import GameCard from './GameCard';
+import DiscardPile from './DiscardPile';
+import { Button } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
 
 interface GameBoardProps {
@@ -102,15 +104,11 @@ export default function GameBoard({ initialState, onRestart }: GameBoardProps) {
               <GameCard key={i} faceDown size="sm" />
             ))}
           </div>
-          <div className="flex gap-1 ml-auto">
+           <div className="flex gap-3 ml-auto">
             {opponent.discardPiles.map((pile, i) => (
-              <div key={i} className="relative">
-                {pile.length > 0 ? (
-                  <GameCard card={getTopCard(pile)} size="sm" />
-                ) : (
-                  <GameCard size="sm" />
-                )}
-                <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground">{pile.length}</span>
+              <div key={i} className="text-center">
+                <DiscardPile pile={pile} size="sm" maxVisible={4} />
+                <span className="text-[9px] text-muted-foreground mt-1 block">{pile.length}</span>
               </div>
             ))}
           </div>
@@ -187,29 +185,27 @@ export default function GameBoard({ initialState, onRestart }: GameBoardProps) {
           </div>
 
           {/* Discard piles */}
-          <div className="flex gap-2 ml-auto">
+          <div className="flex gap-3 ml-auto">
             {me.discardPiles.map((pile, i) => {
               const top = getTopCard(pile);
               return (
                 <div key={i} className="text-center">
-                  <div
+                  <DiscardPile
+                    pile={pile}
+                    size="lg"
+                    selected={selectedSource?.type === 'discard' && selectedSource.pileIndex === i}
                     onClick={() => {
                       if (selectedSource) {
                         handleTargetClick({ type: 'discard', pileIndex: i });
                       } else if (top) {
                         handleSourceClick({ type: 'discard', pileIndex: i });
+                      } else if (selectedSource) {
+                        handleTargetClick({ type: 'discard', pileIndex: i });
                       }
                     }}
-                    className="cursor-pointer"
-                  >
-                    <GameCard
-                      card={top}
-                      selected={selectedSource?.type === 'discard' && selectedSource.pileIndex === i}
-                      size="lg"
-                    />
-                  </div>
+                  />
                   <span className="text-[10px] text-muted-foreground mt-1 block">
-                    discard {pile.length}
+                    Ablage {i + 1}
                   </span>
                 </div>
               );
